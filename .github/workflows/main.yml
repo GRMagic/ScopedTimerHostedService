@@ -20,5 +20,5 @@ jobs:
     - name: Build and Pack
       run: dotnet build --configuration Release
 
-    - name: publish
+    - name: Publish
       run: dotnet nuget push ./ScopedTimerHostedService/bin/Release/*.nupkg -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json
