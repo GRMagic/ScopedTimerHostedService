@@ -8,8 +8,19 @@ using System.Timers;
 
 namespace rmdev.ScopedTimerHostedService
 {
-
+    /// <summary>
+    /// Delegate without CancellationToken
+    /// </summary>
+    /// <typeparam name="T">Service Type</typeparam>
+    /// <param name="service">Injected service</param>
     public delegate void TimerAction<T>(T service) where T : notnull;
+
+    /// <summary>
+    /// Delegate with CancellationToken
+    /// </summary>
+    /// <typeparam name="T">Service Type</typeparam>
+    /// <param name="service">Injected service</param>
+    /// <param name="cancellationToken">Cancellation is requested when the service is stopping</param>
     public delegate void TimerActionWithCancelationToken<T>(T service, CancellationToken cancellationToken) where T : notnull;
 
     internal sealed class ScopedTimerHostedService<T> : IHostedService where T : notnull
