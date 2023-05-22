@@ -13,5 +13,6 @@ public class ExampleTimerA : IScopedTimer
     public void Do(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Doing something...");
+        Thread.Sleep(1500);
     }
 }

@@ -13,7 +13,14 @@ namespace rmdev.ScopedTimerHostedService
     /// </summary>
     /// <typeparam name="T">Service Type</typeparam>
     /// <param name="service">Injected service</param>
-    public delegate void TimerAction<T>(T service) where T : notnull;
+    public delegate void TimerAction<in T>(T service) where T : notnull;
+
+    /// <summary>
+    /// Delegate without CancellationToken
+    /// </summary>
+    /// <typeparam name="T">Service Type</typeparam>
+    /// <param name="service">Injected service</param>
+    public delegate Task TimerActionAsync<in T>(T service) where T : notnull;
 
     /// <summary>
     /// Delegate with CancellationToken
@@ -21,27 +28,57 @@ namespace rmdev.ScopedTimerHostedService
     /// <typeparam name="T">Service Type</typeparam>
     /// <param name="service">Injected service</param>
     /// <param name="cancellationToken">Cancellation is requested when the service is stopping</param>
-    public delegate void TimerActionWithCancelationToken<T>(T service, CancellationToken cancellationToken) where T : notnull;
+    public delegate void TimerActionWithCancelationToken<in T>(T service, CancellationToken cancellationToken) where T : notnull;
+
+    /// <summary>
+    /// Delegate with CancellationToken
+    /// </summary>
+    /// <typeparam name="T">Service Type</typeparam>
+    /// <param name="service">Injected service</param>
+    /// <param name="cancellationToken">Cancellation is requested when the service is stopping</param>
+    public delegate Task TimerActionWithCancelationTokenAsync<in T>(T service, CancellationToken cancellationToken) where T : notnull;
 
     internal sealed class ScopedTimerHostedService<T> : IHostedService where T : notnull
     {
         private readonly TimerAction<T>? _timerAction;
+        private readonly TimerActionAsync<T>? _timerActionAsync;
         private readonly TimerActionWithCancelationToken<T>? _timerActionWithCancelationToken;
+        private readonly TimerActionWithCancelationTokenAsync<T>? _timerActionWithCancelationTokenAsync;
         private readonly IServiceProvider _serviceProvider;
         private readonly System.Timers.Timer _timer = new System.Timers.Timer();
         private readonly SemaphoreSlim _semaphore;
         private CancellationTokenSource? _cancellationTokenSource;
 
-        public ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent, TimerAction<T>? timerAction = null, TimerActionWithCancelationToken<T>? timerActionWithCancelationToken = null)
+        private ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent)
         {
-            _timerAction = timerAction;
-            _timerActionWithCancelationToken = timerActionWithCancelationToken;
-            if(_timerAction == null && _timerActionWithCancelationToken == null)
-                throw new ArgumentNullException(nameof(timerAction));
             _serviceProvider = serviceProvider;
             _timer.Interval = interval;
             _timer.Elapsed += ScopeControl;
             _semaphore = new SemaphoreSlim(concurrent);
+        }
+
+        public ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent, TimerAction<T> timerAction) : this(serviceProvider, interval, concurrent)
+        {
+            if (timerAction == null) throw new ArgumentNullException(nameof(timerAction));
+            _timerAction = timerAction;
+        }
+
+        public ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent, TimerActionAsync<T>? timerActionAsync) : this(serviceProvider, interval, concurrent)
+        {
+            if (timerActionAsync == null) throw new ArgumentNullException(nameof(timerActionAsync));
+            _timerActionAsync = timerActionAsync;
+        }
+
+        public ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent, TimerActionWithCancelationToken<T>? timerActionWithCancelationToken) : this(serviceProvider, interval, concurrent)
+        {
+            if (timerActionWithCancelationToken == null) throw new ArgumentNullException(nameof(timerActionWithCancelationToken));
+            _timerActionWithCancelationToken = timerActionWithCancelationToken;
+        }
+
+        public ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent, TimerActionWithCancelationTokenAsync<T>? timerActionWithCancelationTokenAsync) : this(serviceProvider, interval, concurrent)
+        {
+            if (timerActionWithCancelationTokenAsync == null) throw new ArgumentNullException(nameof(timerActionWithCancelationTokenAsync));
+            _timerActionWithCancelationTokenAsync = timerActionWithCancelationTokenAsync;
         }
 
         private void ScopeControl(object? sender, ElapsedEventArgs e)
@@ -50,17 +87,19 @@ namespace rmdev.ScopedTimerHostedService
             var logger = scope.ServiceProvider.GetService<ILogger<ScopedTimerHostedService<T>>>();
             if (_semaphore.Wait(0))
             {
-                logger?.LogInformation("Doing...");
+                logger?.LogTrace("Doing...");
                 try
                 {
                     var service = scope.ServiceProvider.GetRequiredService<T>();
                     _timerAction?.Invoke(service);
+                    _timerActionAsync?.Invoke(service)?.Wait(_cancellationTokenSource!.Token);
                     _timerActionWithCancelationToken?.Invoke(service, _cancellationTokenSource!.Token);
+                    _timerActionWithCancelationTokenAsync?.Invoke(service, _cancellationTokenSource!.Token)?.Wait();
                 }
                 finally
                 {
                     _semaphore.Release();
-                    logger?.LogInformation("Done.");
+                    logger?.LogTrace("Done.");
                 }
             }
             else
