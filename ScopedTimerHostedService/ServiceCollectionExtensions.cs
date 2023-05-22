@@ -76,7 +76,7 @@ namespace rmdev.ScopedTimerHostedService
         /// <param name="action">The action to execute (with cancelation token)</param>
         /// <param name="interval">Execution interval in ms</param>
         /// <param name="concurrent">Max number of concurrent executions</param>
-        public static void AddScopedTimerAsync<TService>(this IServiceCollection services, TimerActionWithCancelationTokenAsync<TService> action, double interval, int concurrent = 1) where TService : notnull
+        public static void AddScopedTimer<TService>(this IServiceCollection services, TimerActionWithCancelationTokenAsync<TService> action, double interval, int concurrent = 1) where TService : notnull
         {
             services.AddHostedService(sp => new ScopedTimerHostedService<TService>(sp, interval, concurrent, action));
         }
