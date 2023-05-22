@@ -13,7 +13,7 @@ using rmdev.ScopedTimerHostedService;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IService, Service>();
-builder.Services.AddHostedTimer<IService>(service => service.DoSomething(), 5000);
+builder.Services.AddScopedTimer<IService>(service => service.DoSomething(), 5000);
 
 // ... 
 
