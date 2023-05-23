@@ -3,7 +3,7 @@ using rmdev.ScopedTimerHostedService;
 var builder = WebApplication.CreateBuilder(args);
 
 // Dependencies
-builder.Services.AddScoped<ExampleTimerA>();
+//builder.Services.AddScoped<ExampleTimerA>();
 builder.Services.AddScoped<ExampleTimerB>();
 builder.Services.AddScoped<MyServiceA>();
 builder.Services.AddScoped<MyServiceB>();

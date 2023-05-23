@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace rmdev.ScopedTimerHostedService
 {
@@ -14,6 +15,8 @@ namespace rmdev.ScopedTimerHostedService
         /// <param name="concurrent">Max number of concurrent executions</param>
         public static void AddScopedTimer<T>(this IServiceCollection services, double interval, int concurrent = 1) where T : IScopedTimer
         {
+            var type = typeof(T);
+            if (type.IsClass) services.TryAddScoped(type);
             services.AddHostedService(sp => new ScopedTimerHostedService<T>(sp, interval, concurrent, (s, c) => s.Do(c)));
         }
 
@@ -26,6 +29,8 @@ namespace rmdev.ScopedTimerHostedService
         /// <param name="concurrent">Max number of concurrent executions</param>
         public static void AddScopedTimerAsync<T>(this IServiceCollection services, double interval, int concurrent = 1) where T : IScopedTimerAsync
         {
+            var type = typeof(T);
+            if (type.IsClass) services.TryAddScoped(type);
             services.AddHostedService(sp => new ScopedTimerHostedService<T>(sp, interval, concurrent, (s, c) => s.DoAsync(c)));
         }
 
