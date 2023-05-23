@@ -5,7 +5,7 @@ namespace rmdev.ScopedTimerHostedService
     /// <summary>
     /// Scoped timer contract
     /// </summary>
-    public interface IScopedTimer
+    public interface IScopedTimer : IIntervaledTimer
     {
         /// <summary>
         /// Do something when time elapsed

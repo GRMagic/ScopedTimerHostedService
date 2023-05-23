@@ -11,7 +11,8 @@ builder.Services.AddScoped<MyServiceB>();
 // Just one timer per injected type service
 
 // Examples (better to test one at a time)
-builder.Services.AddScopedTimer<ExampleTimerA>(1000);
+//builder.Services.AddScopedTimer<ExampleTimerA>(1000);
+//builder.Services.AddScopedTimer<ExampleTimerA>();
 //builder.Services.AddScopedTimerAsync<ExampleTimerB>(1000);
 //builder.Services.AddScopedTimer<MyServiceA>(myService => myService.DoSomething(), 5000);
 //builder.Services.AddScopedTimer<MyServiceA>((myService, cancellationToken) => myService.DoOtherThing(cancellationToken), 3000);

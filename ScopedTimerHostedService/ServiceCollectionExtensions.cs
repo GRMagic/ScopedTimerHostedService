@@ -1,5 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Timers;
+using System;
 
 namespace rmdev.ScopedTimerHostedService
 {
@@ -13,7 +17,7 @@ namespace rmdev.ScopedTimerHostedService
         /// <param name="services">The service collection</param>
         /// <param name="interval">Execution interval in ms</param>
         /// <param name="concurrent">Max number of concurrent executions</param>
-        public static void AddScopedTimer<T>(this IServiceCollection services, double interval, int concurrent = 1) where T : IScopedTimer
+        public static void AddScopedTimer<T>(this IServiceCollection services, double interval = 0, int concurrent = 1) where T : IScopedTimer
         {
             var type = typeof(T);
             if (type.IsClass) services.TryAddScoped(type);
@@ -27,7 +31,7 @@ namespace rmdev.ScopedTimerHostedService
         /// <param name="services">The service collection</param>
         /// <param name="interval">Execution interval in ms</param>
         /// <param name="concurrent">Max number of concurrent executions</param>
-        public static void AddScopedTimerAsync<T>(this IServiceCollection services, double interval, int concurrent = 1) where T : IScopedTimerAsync
+        public static void AddScopedTimerAsync<T>(this IServiceCollection services, double interval = 0, int concurrent = 1) where T : IScopedTimerAsync
         {
             var type = typeof(T);
             if (type.IsClass) services.TryAddScoped(type);

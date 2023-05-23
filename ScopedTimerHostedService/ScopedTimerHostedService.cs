@@ -51,11 +51,19 @@ namespace rmdev.ScopedTimerHostedService
 
         private ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent)
         {
+            if (interval <= 0)
+            {
+                using var scope = serviceProvider.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<T>() as IIntervaledTimer;
+                interval = service?.Interval??0;
+            }
+
             _serviceProvider = serviceProvider;
             _timer.Interval = interval;
             _timer.Elapsed += ScopeControl;
             _semaphore = new SemaphoreSlim(concurrent);
         }
+
 
         public ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent, TimerAction<T> timerAction) : this(serviceProvider, interval, concurrent)
         {

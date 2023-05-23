@@ -10,6 +10,8 @@ public class ExampleTimerB : IScopedTimerAsync
         _logger.LogInformation("Creating a ExampleTimerB instance...");
     }
 
+    public double Interval => 5000;
+
     public async Task DoAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Doing something...");

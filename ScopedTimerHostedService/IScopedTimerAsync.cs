@@ -6,12 +6,11 @@ namespace rmdev.ScopedTimerHostedService
     /// <summary>
     /// Scoped timer contract async
     /// </summary>
-    public interface IScopedTimerAsync
+    public interface IScopedTimerAsync : IIntervaledTimer
     {
         /// <summary>
         /// Do something when time elapsed
         /// </summary>
         Task DoAsync(CancellationToken cancellationToken);
     }
-
 }

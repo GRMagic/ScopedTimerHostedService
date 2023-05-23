@@ -10,6 +10,8 @@ public class ExampleTimerA : IScopedTimer
         _logger.LogInformation("Creating a ExampleTimerA instance...");
     }
 
+    public double Interval => 5000;
+
     public void Do(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Doing something...");
