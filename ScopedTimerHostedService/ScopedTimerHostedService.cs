@@ -112,7 +112,7 @@ namespace rmdev.ScopedTimerHostedService
             }
             else
             {
-                logger?.LogWarning("It was not done because it reached the concurrency limit.");
+                logger?.LogWarning("{TypeOfTimer} was not triggered because it reached the concurrency limit.", typeof(T).Name);
             }
         }
 
