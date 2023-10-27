@@ -48,10 +48,12 @@ namespace rmdev.ScopedTimerHostedService
         private readonly System.Timers.Timer _timer = new System.Timers.Timer();
         private readonly SemaphoreSlim _semaphore;
         private CancellationTokenSource? _cancellationTokenSource;
+        private readonly bool _intervalFromService;
 
         private ScopedTimerHostedService(IServiceProvider serviceProvider, double interval, int concurrent)
         {
-            if (interval <= 0)
+            _intervalFromService = interval <= 0;
+            if (_intervalFromService)
             {
                 using var scope = serviceProvider.CreateScope();
                 var service = scope.ServiceProvider.GetRequiredService<T>() as IIntervaledTimer;
@@ -99,6 +101,16 @@ namespace rmdev.ScopedTimerHostedService
                 try
                 {
                     var service = scope.ServiceProvider.GetRequiredService<T>();
+                    if (_intervalFromService)
+                    {
+                        var newInterval = (service as IIntervaledTimer)?.Interval??0;
+                        var oldInterval = _timer.Interval;
+                        if (oldInterval != newInterval)
+                        {
+                            _timer.Interval = newInterval;
+                            logger?.LogInformation("{TypeOfTimer} was interval changed from {oldInterval}ms to {newInterval}ms.", typeof(T).Name, oldInterval, newInterval);
+                        }
+                    }
                     _timerAction?.Invoke(service);
                     _timerActionAsync?.Invoke(service)?.Wait(_cancellationTokenSource!.Token);
                     _timerActionWithCancelationToken?.Invoke(service, _cancellationTokenSource!.Token);

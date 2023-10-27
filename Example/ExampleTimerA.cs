@@ -10,7 +10,7 @@ public class ExampleTimerA : IScopedTimer
         _logger.LogInformation("Creating a ExampleTimerA instance...");
     }
 
-    public double Interval => 5000;
+    public double Interval => Random.Shared.Next(100, 10000);
 
     public void Do(CancellationToken cancellationToken)
     {
